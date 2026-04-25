@@ -3,18 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Second Brain Agent</title>
+    <title>Papyrus AI — ancient knowledge meets modern AI</title>
     <!-- Modern Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
             --primary: rgba(255, 255, 255, 0.1);
-            --border: rgba(255, 255, 255, 0.2);
+            --border: rgba(255, 255, 255, 0.1);
+            --border-hover: rgba(255, 255, 255, 0.3);
             --text-main: #ffffff;
             --text-dim: rgba(255, 255, 255, 0.7);
+            --accent: #00d2ff;
         }
 
         * {
@@ -25,12 +27,19 @@
 
         body, html {
             width: 100%;
-            height: 100%;
             font-family: 'Outfit', sans-serif;
-            background-color: #000;
-            overflow: hidden;
+            background-color: #020202; /* Extremely dark base */
             color: var(--text-main);
+            overflow-x: hidden;
+            overflow-y: auto;
+            scroll-behavior: smooth;
         }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
 
         /* 3D Canvas Background */
         #canvas3d {
@@ -40,11 +49,262 @@
             width: 100vw;
             height: 100vh;
             z-index: 1;
-            /* Allow users to interact with the Spline scene */
+            /* Allow interactions if clicking empty space */
             pointer-events: auto;
         }
 
-        /* Subtle loading spinner for Spline */
+        /* Foreground Content Overlay */
+        .content-layer {
+            position: relative;
+            z-index: 2; /* Sits on top of the 3D scene */
+            width: 100%;
+            pointer-events: none; /* Let empty space clicks fall through to canvas */
+        }
+        
+        /* Make sure all actual content boxes capture pointer events */
+        .content-layer > * {
+            pointer-events: auto;
+        }
+
+        /* --- Navbar --- */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-main);
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid var(--border);
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            color: #fff;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: var(--border-hover);
+        }
+
+        /* --- Hero Spacer --- */
+        .hero-spacer {
+            height: 100vh;
+            width: 100%;
+            /* Empty to let user see and interact with 3D scene initially */
+            pointer-events: none; 
+        }
+
+        /* --- Main Sections --- */
+        section {
+            padding: 8rem 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(5, 5, 8, 0.4);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-top: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .section-container {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 5rem;
+        }
+
+        h2 {
+            font-size: 3rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 0%, #a5a5a5 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section-header p {
+            font-size: 1.25rem;
+            color: var(--text-dim);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* --- Glass Cards --- */
+        .glass-card {
+            background: rgba(20, 20, 25, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--border-hover);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+
+        .glass-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .glass-card p {
+            color: var(--text-dim);
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        /* --- Grid Layouts --- */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .use-cases-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .how-it-works-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .step-card {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            background: linear-gradient(90deg, rgba(20, 20, 25, 0.8) 0%, rgba(20, 20, 25, 0) 100%);
+            padding: 2rem;
+            border-left: 2px solid var(--accent);
+            border-radius: 0 20px 20px 0;
+        }
+
+        .step-card span {
+            font-size: 1.5rem;
+        }
+
+        /* --- Tech Stack Table --- */
+        .tech-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(20, 20, 25, 0.5);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .tech-table th, .tech-table td {
+            padding: 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .tech-table th {
+            background: rgba(0,0,0,0.5);
+            font-weight: 600;
+            color: var(--text-dim);
+        }
+        
+        .tech-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* --- Footer --- */
+        footer {
+            padding: 4rem 2rem;
+            text-align: center;
+            background: #000;
+            border-top: 1px solid var(--border);
+            position: relative;
+            z-index: 3;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .social-icons a {
+            color: var(--text-dim);
+            transition: color 0.3s;
+        }
+
+        .social-icons a:hover {
+            color: #fff;
+        }
+
+        .social-icons svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        .developer-text {
+            color: var(--text-dim);
+            font-weight: 300;
+        }
+
+        /* Loader */
         .loader {
             position: absolute;
             top: 50%;
@@ -53,21 +313,274 @@
             width: 40px;
             height: 40px;
             border: 3px solid rgba(255,255,255,0.1);
-            border-top-color: #fff;
+            border-top-color: var(--accent);
             border-radius: 50%;
             animation: spin 1s linear infinite;
             z-index: 0;
         }
+        @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
 
-        @keyframes spin { 
-            to { transform: translate(-50%, -50%) rotate(360deg); } 
+        /* --- Responsive Design --- */
+        @media (max-width: 900px) {
+            nav {
+                padding: 1rem 2rem;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 1rem;
+            }
+            .nav-links {
+                order: 3;
+                width: 100%;
+                justify-content: center;
+            }
+            section {
+                padding: 4rem 1.5rem;
+            }
+            h2 {
+                font-size: 2.2rem;
+            }
+            .section-header {
+                margin-bottom: 3rem;
+            }
+            .step-card {
+                flex-direction: column;
+                text-align: center;
+                border-left: none;
+                border-top: 2px solid var(--accent);
+                border-radius: 0 0 20px 20px;
+                padding: 2rem 1rem;
+                gap: 1rem;
+            }
+            .tech-table {
+                display: block;
+                overflow-x: auto;
+            }
         }
+
+        @media (max-width: 600px) {
+            nav {
+                padding: 1rem;
+            }
+            .nav-links {
+                flex-wrap: wrap;
+                gap: 0.75rem;
+                font-size: 0.9rem;
+            }
+            h2 {
+                font-size: 1.75rem;
+            }
+            .section-header p {
+                font-size: 1.1rem;
+            }
+            .glass-card {
+                padding: 1.5rem;
+            }
+        }
+
     </style>
 </head>
 <body>
 
+    <!-- Loading Spinner -->
     <div class="loader" id="loader"></div>
+    
+    <!-- 3D Background -->
     <canvas id="canvas3d"></canvas>
+
+    <!-- Scrollable Content Overlay -->
+    <div class="content-layer">
+        
+        <!-- Navbar -->
+        <nav>
+            <a href="#" class="logo">Papyrus AI</a>
+            <div class="nav-links">
+                <a href="#home">Home</a>
+                <a href="#about">About Papyrus</a>
+                <a href="#contact">Contact</a>
+            </div>
+            <a href="/app" class="nav-btn">Launch App</a>
+        </nav>
+
+        <!-- Hero Spacer (Shows Spline Scene) -->
+        <div id="home" class="hero-spacer"></div>
+
+        <!-- About Section -->
+        <section id="about">
+            <div class="section-container">
+                <div class="section-header">
+                    <h2>What is Papyrus AI?</h2>
+                    <p>Papyrus AI is a local, private AI assistant that transforms your static documents into a living knowledge base. Powered by Google Gemini and LangGraph, it lets you chat with your own files, uncover contradictions across your notes, and extract action items — all without your data ever leaving your machine.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section>
+            <div class="section-container">
+                <div class="section-header">
+                    <h2>Everything your second brain needs</h2>
+                    <p>✨ Features Section</p>
+                </div>
+                
+                <div class="features-grid">
+                    <div class="glass-card">
+                        <h3>🗂️ Multi-format Support</h3>
+                        <p>Upload PDFs, Word docs, plain text, or Markdown files. Papyrus handles them all.</p>
+                    </div>
+                    <div class="glass-card">
+                        <h3>💬 Chat with your Docs</h3>
+                        <p>Ask natural language questions and get precise answers with source citations from your own documents.</p>
+                    </div>
+                    <div class="glass-card">
+                        <h3>🔍 AI-Powered Insights</h3>
+                        <p>Discover non-obvious connections between your notes, spot contradictions, and surface forgotten action items automatically.</p>
+                    </div>
+                    <div class="glass-card">
+                        <h3>🔒 100% Private & Local</h3>
+                        <p>Your documents never leave your machine. No cloud storage. No data sharing. Just you and your knowledge.</p>
+                    </div>
+                    <div class="glass-card">
+                        <h3>⚡ Blazing Fast Retrieval</h3>
+                        <p>Powered by ChromaDB vector search — finds the most relevant chunks from thousands of pages in milliseconds.</p>
+                    </div>
+                    <div class="glass-card">
+                        <h3>🧠 Persistent Memory</h3>
+                        <p>Close the app, come back tomorrow — Papyrus remembers everything you've ever uploaded.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works -->
+        <section>
+            <div class="section-container">
+                <div class="section-header">
+                    <h2>Three agents. One brain.</h2>
+                    <p>⚙️ How It Works</p>
+                </div>
+                
+                <div class="how-it-works-steps">
+                    <div class="step-card">
+                        <span>📥</span>
+                        <div>
+                            <h3 style="margin-bottom: 0.5rem; font-size: 1.25rem;">Step 1 — Ingest</h3>
+                            <p style="color: var(--text-dim);">Drop in your files. The Ingestion Agent parses, chunks, and embeds them into a local vector database instantly.</p>
+                        </div>
+                    </div>
+                    <div class="step-card">
+                        <span>💬</span>
+                        <div>
+                            <h3 style="margin-bottom: 0.5rem; font-size: 1.25rem;">Step 2 — Query</h3>
+                            <p style="color: var(--text-dim);">Ask anything. The Query Agent retrieves the most relevant chunks and sends them to Gemini 2.5 Flash for a precise, cited answer.</p>
+                        </div>
+                    </div>
+                    <div class="step-card">
+                        <span>💡</span>
+                        <div>
+                            <h3 style="margin-bottom: 0.5rem; font-size: 1.25rem;">Step 3 — Discover</h3>
+                            <p style="color: var(--text-dim);">Hit "Generate Insights". The Insight Agent scans your entire knowledge base and surfaces contradictions, connections, and action items you never noticed.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tech Stack -->
+        <section>
+            <div class="section-container">
+                <div class="section-header">
+                    <h2>Built with powerful, free tools</h2>
+                    <p>🛠️ Tech Stack Section</p>
+                </div>
+                
+                <table class="tech-table">
+                    <thead>
+                        <tr>
+                            <th>Technology</th>
+                            <th>Role</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>🤖 Google Gemini 2.5 Flash</td>
+                            <td>LLM for answering & insights</td>
+                        </tr>
+                        <tr>
+                            <td>🗄️ ChromaDB</td>
+                            <td>Local vector database</td>
+                        </tr>
+                        <tr>
+                            <td>🔗 LangGraph</td>
+                            <td>Multi-agent orchestration</td>
+                        </tr>
+                        <tr>
+                            <td>📐 Sentence Transformers</td>
+                            <td>Local embeddings</td>
+                        </tr>
+                        <tr>
+                            <td>🎨 Gradio</td>
+                            <td>Interactive UI</td>
+                        </tr>
+                        <tr>
+                            <td>🐍 Python</td>
+                            <td>Core language</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Use Cases -->
+        <section>
+            <div class="section-container">
+                <div class="section-header">
+                    <h2>Who is Papyrus AI for?</h2>
+                    <p>💬 Use Cases Section</p>
+                </div>
+                
+                <div class="use-cases-grid">
+                    <div class="glass-card">
+                        <h3>🎓 Students</h3>
+                        <p>Chat with your semester notes, find gaps in your study material, extract todos before exams.</p>
+                    </div>
+                    <div class="glass-card">
+                        <h3>🔬 Researchers</h3>
+                        <p>Upload papers and ask cross-document questions. Find contradictions across sources instantly.</p>
+                    </div>
+                    <div class="glass-card">
+                        <h3>💼 Professionals</h3>
+                        <p>Never lose track of meeting notes, project docs, or reports. Ask instead of searching.</p>
+                    </div>
+                    <div class="glass-card">
+                        <h3>✍️ Writers</h3>
+                        <p>Upload your drafts and reference material. Let Papyrus connect ideas you forgot you had.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer id="contact">
+            <div class="footer-content">
+                <div class="social-icons">
+                    <!-- GitHub Icon -->
+                    <a href="#" aria-label="GitHub">
+                        <svg viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    </a>
+                    <!-- LinkedIn Icon -->
+                    <a href="#" aria-label="LinkedIn">
+                        <svg viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                    </a>
+                    <!-- Gmail Icon (Envelope) -->
+                    <a href="#" aria-label="Gmail">
+                        <svg viewBox="0 0 24 24"><path d="M0 3v18h24v-18h-24zm21.518 2l-9.518 7.713-9.518-7.713h19.036zm-19.518 14v-11.817l10 8.104 10-8.104v11.817h-20z"/></svg>
+                    </a>
+                </div>
+                <p class="developer-text">Developer: Gaurav Joshi</p>
+            </div>
+        </footer>
+
+    </div>
 
     <!-- Spline Runtime (Vanilla JS Integration) -->
     <script type="module">

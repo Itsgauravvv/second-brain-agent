@@ -133,12 +133,12 @@ def create_ui():
         block_background_fill="rgba(0,0,0,0.5)"
     )
 
-    with gr.Blocks(theme=theme, title="Second Brain Agent") as demo:
+    with gr.Blocks(theme=theme, title="Papyrus AI") as demo:
         gr.HTML(custom_css)
         with gr.Row():
             # Sidebar
             with gr.Column(scale=1, variant="panel"):
-                gr.Markdown("## 🧠 Parypus AI")
+                gr.Markdown("## 🧠 Papyrus AI")
                 gr.Markdown("Your AI-powered Second Brain, ready to use!")
                 
                 sidebar_text = gr.Markdown(get_sidebar_info())
@@ -152,7 +152,7 @@ def create_ui():
                     with gr.Tab("💬 Chat with your Docs"):
                         file_uploader = gr.File(label="Upload Documents (PDF, DOCX, TXT, MD)", file_count="multiple")
                         
-                        # ✅ Gradio 6 fix: type='messages' is invalid, the new dict format is standard.
+                        
                         chatbot = gr.Chatbot(
                             label="Agent Conversation"
                         )
