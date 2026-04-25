@@ -1,0 +1,11 @@
+gradio
+langgraph
+langchain
+langchain-google-genai
+google-generativeai
+chromadb
+sentence-transformers
+PyMuPDF
+python-docx
+python-dotenv
+tiktoken
