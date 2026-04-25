@@ -138,8 +138,8 @@ def create_ui():
         with gr.Row():
             # Sidebar
             with gr.Column(scale=1, variant="panel"):
-                gr.Markdown("## 🧠 Second Brain Agent")
-                gr.Markdown("A local, private AI assistant using LangGraph & Gemini.")
+                gr.Markdown("## 🧠 Parypus AI")
+                gr.Markdown("Your AI-powered Second Brain, ready to use!")
                 
                 sidebar_text = gr.Markdown(get_sidebar_info())
                 
