@@ -22,7 +22,7 @@ def read_main():
         return HTMLResponse(f.read())
 
 if __name__ == "__main__":
-    print("Starting Second Brain Agent...")
+    print("Starting Papyrus AI...")
     demo = create_ui()
     
     # Mount Gradio app onto FastAPI
