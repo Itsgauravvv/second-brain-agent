@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Second Brain Agent</title>
+    <!-- Modern Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: rgba(255, 255, 255, 0.1);
+            --border: rgba(255, 255, 255, 0.2);
+            --text-main: #ffffff;
+            --text-dim: rgba(255, 255, 255, 0.7);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            font-family: 'Outfit', sans-serif;
+            background-color: #000;
+            overflow: hidden;
+            color: var(--text-main);
+        }
+
+        /* 3D Canvas Background */
+        #canvas3d {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            /* Allow users to interact with the Spline scene */
+            pointer-events: auto;
+        }
+
+        /* Subtle loading spinner for Spline */
+        .loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes spin { 
+            to { transform: translate(-50%, -50%) rotate(360deg); } 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="loader" id="loader"></div>
+    <canvas id="canvas3d"></canvas>
+
+    <!-- Spline Runtime (Vanilla JS Integration) -->
+    <script type="module">
+        import { Application } from 'https://esm.sh/@splinetool/runtime';
+        
+        const canvas = document.getElementById('canvas3d');
+        const loader = document.getElementById('loader');
+        
+        const spline = new Application(canvas);
+        spline.load('https://prod.spline.design/aQ4jD86Sxw8PUYAY/scene.splinecode')
+            .then(() => {
+                // Hide loader when scene is loaded
+                loader.style.display = 'none';
+                
+                // Robust click detection using distance to allow minor mouse movements
+                let startX = 0, startY = 0;
+                
+                canvas.addEventListener('pointerdown', (e) => { 
+                    startX = e.clientX;
+                    startY = e.clientY;
+                });
+                
+                canvas.addEventListener('pointerup', (e) => { 
+                    let dx = e.clientX - startX;
+                    let dy = e.clientY - startY;
+                    let distance = Math.sqrt(dx*dx + dy*dy);
+                    
+                    // If moved less than 10 pixels, it's a click, not a drag
+                    if (distance < 10) {
+                        window.location.href = '/app';
+                    }
+                });
+            });
+    </script>
+</body>
+</html>

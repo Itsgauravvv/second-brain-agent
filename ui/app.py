@@ -105,18 +105,36 @@ def handle_insights():
         
     return format_list(contra), format_list(conn), format_list(act)
 
+custom_css = """
+<style>
+body, .gradio-container, .dark {
+    background: url('/assets/app_bg.png') no-repeat center center fixed !important;
+    background-size: cover !important;
+    background-color: transparent !important;
+}
+/* Make inner containers transparent to let the background show */
+.wrap, #root, .contain {
+    background: transparent !important;
+}
+</style>
+"""
+
 def create_ui():
     """Builds and returns the Gradio Blocks."""
     theme = gr.themes.Soft(
         primary_hue="indigo",
         secondary_hue="blue",
     ).set(
-        body_background_fill="*neutral_950",
+        body_background_fill="transparent",
+        background_fill_primary="rgba(0,0,0,0.4)",
+        background_fill_secondary="rgba(0,0,0,0.2)",
+        border_color_primary="rgba(255,255,255,0.1)",
         body_text_color="white",
-        background_fill_secondary="*neutral_900"
+        block_background_fill="rgba(0,0,0,0.5)"
     )
 
-    with gr.Blocks(title="Second Brain Agent") as demo:
+    with gr.Blocks(theme=theme, title="Second Brain Agent") as demo:
+        gr.HTML(custom_css)
         with gr.Row():
             # Sidebar
             with gr.Column(scale=1, variant="panel"):
