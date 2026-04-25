@@ -45,8 +45,6 @@ def handle_upload(files) -> str:
         return "No files uploaded."
         
     for f in files:
-        # Avoid overriding existing files with the same name if possible,
-        # but for this simple version we just copy over
         try:
             filename = os.path.basename(f.name)
             target_path = os.path.join(UPLOAD_DIR, filename)
@@ -63,24 +61,28 @@ def handle_upload(files) -> str:
 def handle_query(message, history):
     """
     Handles chat querying. Expects message and returns updated history.
+    Compatible with Gradio 6 message format (list of dicts).
     """
+    if not message.strip():
+        return "", history
+
     # Trigger Query Pipeline
     state = app_pipeline.invoke({"mode": "query", "query": message, "files": [], "response": "", "insights": {}})
     response = state.get("response", "Error getting response.")
     
-    # We output an expandable details block for sources if any sources were appended in the graph
-    # (they are already appended in pipeline.py logic)
-    
-    # Just format it manually if it contains sources
+    # Format sources as expandable block if present
     if "\n\nSources:\n" in response:
         parts = response.split("\n\nSources:\n")
         answer = parts[0]
         sources = parts[1]
-        formatted_response = f"{answer}\n\n<details><summary><b>Sources</b></summary>\n\n{sources}\n</details>"
+        formatted_response = f"{answer}\n\n<details><summary><b>📂 Sources</b></summary>\n\n{sources}\n</details>"
     else:
         formatted_response = response
-        
-    history.append((message, formatted_response))
+
+    # ✅ Gradio 6 fix: use dict format instead of tuple
+    history.append({"role": "user", "content": message})
+    history.append({"role": "assistant", "content": formatted_response})
+
     return "", history
 
 def handle_insights():
@@ -114,7 +116,7 @@ def create_ui():
         background_fill_secondary="*neutral_900"
     )
 
-    with gr.Blocks(theme=theme, title="Second Brain Agent") as demo:
+    with gr.Blocks(title="Second Brain Agent") as demo:
         with gr.Row():
             # Sidebar
             with gr.Column(scale=1, variant="panel"):
@@ -132,11 +134,17 @@ def create_ui():
                     with gr.Tab("💬 Chat with your Docs"):
                         file_uploader = gr.File(label="Upload Documents (PDF, DOCX, TXT, MD)", file_count="multiple")
                         
-                        chatbot = gr.Chatbot(label="Agent Conversation", sanitize_html=False)
-                        msg = gr.Textbox(label="Ask a question about your documents...", placeholder="E.g., What did I write about project Phoenix?")
+                        # ✅ Gradio 6 fix: type='messages' is invalid, the new dict format is standard.
+                        chatbot = gr.Chatbot(
+                            label="Agent Conversation"
+                        )
+                        msg = gr.Textbox(
+                            label="Ask a question about your documents...",
+                            placeholder="E.g., What did I write about project Phoenix?"
+                        )
                         clear = gr.ClearButton([msg, chatbot])
                         
-                        # Set up events
+                        # Events
                         file_uploader.upload(
                             fn=handle_upload,
                             inputs=[file_uploader],
@@ -162,7 +170,6 @@ def create_ui():
                         with gr.Accordion("✅ Action Items", open=True):
                             act_box = gr.Markdown("...")
                             
-                        # Set up event
                         gen_btn.click(
                             fn=handle_insights,
                             inputs=[],

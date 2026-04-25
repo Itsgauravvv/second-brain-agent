@@ -1,15 +1,14 @@
 import os
-import google.generativeai as genai
+import google.genai as genai
 from core.embedder import embed_query
 from core.vector_store import query_db
 
-# Configure Gemini
+# Configure Gemini using new google.genai client
 api_key = os.environ.get("GOOGLE_API_KEY")
-if api_key:
-    genai.configure(api_key=api_key)
+client = genai.Client(api_key=api_key)
 
 # The chosen model
-MODEL_NAME = "gemini-1.5-flash"
+MODEL_NAME = "gemini-2.5-flash"
 
 def run_query(question: str) -> dict:
     """
@@ -52,10 +51,12 @@ def run_query(question: str) -> dict:
     
     prompt = f"{system_prompt}\n\nContext:\n{context_text}\n\nQuestion:\n{question}\n\nAnswer:"
 
-    # Call Gemini
+    # Call Gemini using new client syntax
     try:
-        model = genai.GenerativeModel(MODEL_NAME)
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model=MODEL_NAME,
+            contents=prompt
+        )
         answer = response.text
     except Exception as e:
         answer = f"Error calling Gemini API: {e}"

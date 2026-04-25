@@ -10,4 +10,4 @@ if __name__ == "__main__":
     print("Starting Second Brain Agent...")
     demo = create_ui()
     # Launch Gradio server
-    demo.launch(server_name="127.0.0.1", server_port=7860, show_api=False)
+    demo.launch(server_name="127.0.0.1", server_port=7860)

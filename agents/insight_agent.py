@@ -2,10 +2,13 @@ import os
 import json
 import random
 import re
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from core.vector_store import get_all_chunks
 
-MODEL_NAME = "gemini-1.5-flash"
+MODEL_NAME = "gemini-2.5-flash"
+api_key = os.environ.get("GOOGLE_API_KEY")
+client = genai.Client(api_key=api_key) if api_key else genai.Client()
 
 def run_insights() -> dict:
     """
@@ -49,8 +52,13 @@ def run_insights() -> dict:
     prompt = f"{system_prompt}\n\nDocument Chunks:\n{context_text}"
     
     try:
-        model = genai.GenerativeModel(MODEL_NAME, generation_config={"response_mime_type": "application/json"})
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model=MODEL_NAME,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json"
+            )
+        )
         text = response.text
         
         # safely parse JSON
