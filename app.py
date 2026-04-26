@@ -14,7 +14,7 @@ from ui.app import create_ui
 app = FastAPI()
 
 # Serve assets
-app.mount("/assets", StaticFiles(directory="ui/assets"), name="assets")
+
 
 @app.get("/")
 def read_main():
