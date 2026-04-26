@@ -8,6 +8,3 @@ __pycache__/
 .venv/
 venv
 spline-3d-skill.zip
-ui/assets/*.png
-ui/assets/*.jpg
-ui/assets/*.jpeg
