@@ -133,7 +133,7 @@ def create_ui():
         block_background_fill="rgba(0,0,0,0.5)"
     )
 
-    with gr.Blocks(theme=theme, title="Papyrus AI") as demo:
+    with gr.Blocks(title="Papyrus AI") as demo:
         gr.HTML(custom_css)
         with gr.Row():
             # Sidebar

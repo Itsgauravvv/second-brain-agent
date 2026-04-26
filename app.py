@@ -5,16 +5,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 import gradio as gr
 import uvicorn
 from ui.app import create_ui
 
 app = FastAPI()
-
-# Serve assets
-
 
 @app.get("/")
 def read_main():
@@ -28,7 +24,8 @@ if __name__ == "__main__":
     # Mount Gradio app onto FastAPI
     app = gr.mount_gradio_app(app, demo, path="/app")
     
-    # Launch server
-    print("Landing Page running on http://127.0.0.1:7860")
-    print("Gradio Agent running on http://127.0.0.1:7860/app")
-    uvicorn.run(app, host="127.0.0.1", port=7860)
+    print("Landing Page running on http://0.0.0.0:7860")
+    print("Gradio Agent running on http://0.0.0.0:7860/app")
+    
+    # ✅ Changed 127.0.0.1 to 0.0.0.0 for HuggingFace
+    uvicorn.run(app, host="0.0.0.0", port=7860)
