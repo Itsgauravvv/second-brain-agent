@@ -1,3 +1,13 @@
+---
+title: Papyrus AI
+emoji: 📜
+colorFrom: indigo
+colorTo: blue
+sdk: gradio
+app_file: app.py
+pinned: false
+---
+
 # 🧠 Papyrus AI
 
 Papyrus AI is a local, private AI assistant that transforms your static documents into a living knowledge base. Powered by Google Gemini and LangGraph, it lets you chat with your own files, uncover contradictions across your notes, and extract action items — all without your data ever leaving your machine.
